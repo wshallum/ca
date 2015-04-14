@@ -1,0 +1,46 @@
+Note: do not use for anything serious.
+
+This program was written to help me graduate back in 2007. It also doubles as
+a GUI CA application, much like tinyCA, but using cryptlib instead of OpenSSL.
+
+This is technically security software, but this has just enough coding done to
+let me graduate. I really doubt if it is secure enough in places (e.g. temp
+files, buffers, passwords). It also has a nasty habit of exiting immediately if
+anything unexpected happens.
+
+Suggested alternatives are: 
+ - tinyCA
+ - OpenSSL "ca" command
+ - GnuTLS "certtool" command
+
+Requirements:
+ - Cryptlib header and static library
+   - please copy to cryptlib/include/cryptlib.h and cryptlib/lib/libcl.a
+ - pkg-config, and the .pc files for:
+   - GTK+-2.0
+   - libglade
+
+Configuring
+ - The built files (Makefile.in, configure, etc.) are not included. Rebuild
+   using autogen.sh (tested on whatever versions are in CentOS 7)
+ - The default prefix is /opt/LMZca. Change if you want to.
+ - The path to the *.glade files depends on the prefix, so by default 
+   the program cannot be run without installing. Pass --enable-development
+   to configure to compile a program that can be run without being installed
+   (it will look for *.glade files inside src/gui).
+
+I'm not saying you should use it, but if you do, you get these...
+
+Features:
+ - Stores multiple CAs in one sqlite3 database
+ - Exports CA certificate and signed certificates in DER / PEM
+ - Imports PKCS#10 CSR and stores in requests table
+ - Signs CSR with selectable key usage and validity
+ - Revokes signed certificates
+ - Renews signed certificates
+ - Exports CRL
+ - Syncs with "web database" (NOTE: webapp not included)
+
+Known misfeatures:
+ - Since the individual revocations are signed by signing an in-memory struct,
+   it is not portable.

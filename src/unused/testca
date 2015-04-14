@@ -1,0 +1,41 @@
+#!/bin/bash
+rm -rf test
+mkdir test
+echo "*** create 1"
+./newca create test/db test-ca ID "" "" "Test" "EDP" "Certificate Authority 0" test/ca.crt
+# openssl x509 -subject -issuer -purpose -noout < test/ca.crt
+echo "*** create 2"
+./newca create test/db test-ca2 ID "" "" "Test" "EDP" "Certificate Authority 1" test/ca1.crt
+# openssl x509 -subject -issuer -purpose -noout < test/ca1.crt
+echo "*** recreate 1"
+./newca create test/db test-ca ID "" "" "Test" "EDP" "Certificate Authority 0" test/ca2.crt
+echo "*** request"
+./newca request test/db test-ca test-data/request1.csr.der
+echo "*** request dup"
+./newca request test/db test-ca test-data/request1.csr.der
+echo "*** request -- nondup w/ same key"
+./newca request test/db test-ca test-data/request2.csr.der
+echo "*** request 3"
+./newca request test/db test-ca test-data/request3.csr.der
+echo "*** sign 1"
+./newca sign test/db test-ca 1 test/request1.crt
+echo "*** sign w/ same key"
+./newca sign test/db test-ca 2 test/request2.crt
+echo "*** sign"
+./newca sign test/db test-ca 3 test/request3.crt
+echo "*** listing certs"
+./newca lsc test/db test-ca
+echo "*** revoke"
+./newca revoke test/db test-ca 1 kc
+echo "*** renew"
+./newca renew test/db test-ca 2 180
+echo "*** messing w/ db revocation data"
+sqlite3 test/db 'UPDATE revocations SET reason=NULL where id=1'
+sleep 3
+echo "*** gencrl"
+./newca gencrl test/db test-ca test/crl.der
+echo "*** dumping crl"
+openssl crl -noout -text -inform der -in test/crl.der
+echo "*** listing certs"
+./newca lsc test/db test-ca
+# echo ".dump CAs" | sqlite3 test/db

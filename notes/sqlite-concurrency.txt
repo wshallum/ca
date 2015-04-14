@@ -1,0 +1,27 @@
+SQLite concurrency:
+S LOCK (Shared Read)
+R LOCK (Reserved Write Lock -- no other writers permitted, waiting for COMMIT / spill)
+P LOCK (Pending Write Lock -- no new S locks given)
+X LOCK (Exclusive Write Lock -- no other locks permitted)
+
+lock granularity is database-wide lock.
+
+BEGIN -> no locks
+BEGIN IMMEDIATE -> R LOCK (no other writers permitted, S locks allowed)
+BEGIN EXCLUSIVE -> X LOCK (no other readers/writers, period.)
+SELECT -> S LOCK
+INSERT/UPDATE/DELETE -> R LOCK
+COMMIT / mem cache spilled -> P -> X LOCK -> no locks
+
+to effectively serialize: R LOCKS only for transactions (use BEGIN IMMEDIATE), 
+if busy, wait until not busy
+
+single statement reads need not take locks (autocommit, S locks only forbidden during
+P->X, X (commit time only) -- if this proves problematic then just put a 10s timeout on it)
+
+multi statement reads that need a consistent view should also take R locks, because a
+transaction holding an R lock might error out on committing if there is also a read 
+transaction holding an S lock.
+
+The purpose of this "protocol" is to guarantee that busy errors only happen on BEGIN time, 
+to localize busy error handling.

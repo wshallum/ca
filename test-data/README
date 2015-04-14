@@ -1,0 +1,6 @@
+key12.pem: RSA private key for request1, request2
+key3.pem: RSA private key for request3
+request1.csr.der: CSR "C=ID, O=Test, OU=EDP, CN=Subject 1"
+request2.csr.der: CSR "C=ID, O=Test, OU=EDP, CN=Subject 2"
+request3.csr.der: CSR "C=ID, O=Test, OU=EDP, CN=Subject 3" with requested keyUsage
+

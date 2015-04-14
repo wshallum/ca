@@ -1,0 +1,25 @@
+# built files
+*.o
+lmzca
+
+# autojunk
+compile
+configure
+Makefile.in
+autom4te.cache/*
+aclocal.m4
+aclocal/*
+depcomp
+install-sh
+missing
+auto_config.h
+
+# cryptlib files
+cryptlib/include/cryptlib.h
+cryptlib/lib/libcl.a
+
+# test data
+test-data/*.der 
+test-data/*.csr.der 
+test-data/*.pem
+test-data/*.cnf

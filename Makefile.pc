@@ -1,0 +1,82 @@
+#!/usr/bin/make -f
+# Makefile that uses pkg-config
+# run: make -f Makefile.pc
+# note: please create auto_config.h from auto_config.h.in
+
+.DEFAULT: all
+.SUFFIXES: 
+
+LMZ_UI_ROOT=src/gui
+
+THISMAKEFILE=Makefile.pc
+CLLIB=cryptlib/lib/libcl.a
+CLINC=cryptlib/include/cryptlib.h
+SQLITELIBS=-lsqlite3
+
+
+all: 
+	$(MAKE) -f $(THISMAKEFILE) "GTKCFLAGS=$$(pkg-config 'gtk+-2.0 >= 2.6 libglade-2.0 >= 2.4' --cflags)" "GTKLIBS=$$(pkg-config 'gtk+-2.0 >= 2.6 libglade-2.0 >= 2.4' --libs)" all-sub "INCLUDECFLAGS=-Icryptlib/include -Isrc -Isrc/gui -I. -DLMZ_UI_ROOT=\"\\\"$(LMZ_UI_ROOT)\\\"\""
+
+all-sub: lmzca
+
+CADBINCS=src/cadb.h $(CLINC)
+FEINCS=src/gui/frontend.h src/cadb.h $(CLINC)
+
+src/cadb.o: src/cadb.c $(CADBINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/cadb.c
+src/certinfo.o: src/certinfo.c src/certinfo.h $(CADBINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/certinfo.c
+src/gui/choosedb.o: src/gui/choosedb.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/choosedb.c
+src/gui/dialogs.o: src/gui/dialogs.c auto_config.h
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/dialogs.c
+src/gui/exportcacertdialog.o: src/gui/exportcacertdialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/exportcacertdialog.c
+src/gui/exportcrldialog.o: src/gui/exportcrldialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/exportcrldialog.c
+src/gui/gui_asn1tree.o: src/gui/gui_asn1tree.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/gui_asn1tree.c
+src/gui/gui_main.o: src/gui/gui_main.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/gui_main.c
+src/gui/gui_mainwin.o: src/gui/gui_mainwin.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/gui_mainwin.c
+src/gui/importrequestdialog.o: src/gui/importrequestdialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/importrequestdialog.c
+src/gui/infobox.o: src/gui/infobox.c src/certinfo.h $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/infobox.c
+src/gui/listmodels.o: src/gui/listmodels.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/listmodels.c
+src/gui/newcadialog.o: src/gui/newcadialog.c src/gui/countrycodes.inc $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/newcadialog.c
+src/gui/renewdialog.o: src/gui/renewdialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/renewdialog.c
+src/gui/revokedialog.o: src/gui/revokedialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/revokedialog.c
+src/gui/signdialog.o: src/gui/signdialog.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/signdialog.c
+src/gui/webdb.o: src/gui/webdb.c $(FEINCS)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(INCLUDECFLAGS) -c -o $@ src/gui/webdb.c
+
+ALLOBJS = src/cadb.o \
+src/certinfo.o \
+src/gui/choosedb.o \
+src/gui/dialogs.o \
+src/gui/exportcacertdialog.o \
+src/gui/exportcrldialog.o \
+src/gui/gui_asn1tree.o \
+src/gui/gui_main.o \
+src/gui/gui_mainwin.o \
+src/gui/importrequestdialog.o \
+src/gui/infobox.o \
+src/gui/listmodels.o \
+src/gui/newcadialog.o \
+src/gui/renewdialog.o \
+src/gui/revokedialog.o \
+src/gui/signdialog.o \
+src/gui/webdb.o 
+
+lmzca: $(ALLOBJS) $(CLLIB)
+	$(CC) $(CFLAGS) $(GTKCFLAGS) $(LDFLAGS) -o $@ $(ALLOBJS) $(CLLIB) $(GTKLIBS) $(SQLITELIBS)
+
+clean:
+	rm -f lmzca $(ALLOBJS) 
